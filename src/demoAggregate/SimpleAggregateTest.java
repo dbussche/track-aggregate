@@ -1,9 +1,9 @@
-package aggregate;
+package demoAggregate;
 
 import java.util.ArrayList;
 
-import aggregate.aggregatieMethoden.AlleKlassen;
-import nl.bikeprint.trackaggregate.shared.AggregeerInterface;
+import nl.bikeprint.trackaggregate.aggregegationMethods.AllClasses;
+import nl.bikeprint.trackaggregate.shared.AggregationInterface;
 import nl.bikeprint.trackaggregate.shared.GPSTrack;
 
 public class SimpleAggregateTest {
@@ -13,9 +13,9 @@ public class SimpleAggregateTest {
 
         String bbox = "652000,6775000,653000,6776000"; // Lent
 
-	    ArrayList<AggregeerInterface> aggregeerMethoden = AlleKlassen.getAggregeerKlassen();
-	    BikePrintDatabaseSchrijver databaseSchrijver = new BikePrintDatabaseSchrijver("test");
-	    for (AggregeerInterface aggregeerMethode: aggregeerMethoden) {
+	    ArrayList<AggregationInterface> aggregationClasses = AllClasses.getAggregationClasses();
+	    BikePrintDatabaseWriter databaseSchrijver = new BikePrintDatabaseWriter("test");
+	    for (AggregationInterface aggregeerMethode: aggregationClasses) {
 	    	System.out.println("init1 " +  aggregeerMethode.getClass().getName());
 	    	aggregeerMethode.init(databaseSchrijver, bbox);
 	    }
@@ -44,12 +44,12 @@ public class SimpleAggregateTest {
 	    gpsTrack.add(652733.30017391, 6776546.560756, 17.964, "2015-09-14 17:57:25");
 	    
 
-	    for (AggregeerInterface aggregeerMethode: aggregeerMethoden) {
+	    for (AggregationInterface aggregeerMethode: aggregationClasses) {
 	    	aggregeerMethode.add(gpsTrack);
 	    }
 	    
-	    for (AggregeerInterface aggregeerMethode: aggregeerMethoden) {
-	    	aggregeerMethode.schrijfNaarDatabase();
+	    for (AggregationInterface aggregeerMethode: aggregationClasses) {
+	    	aggregeerMethode.exit();
 	    }
 	    
 	}

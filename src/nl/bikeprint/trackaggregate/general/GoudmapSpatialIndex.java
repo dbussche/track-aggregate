@@ -1,4 +1,4 @@
-package nl.bikeprint.trackaggregate.algemeen;
+package nl.bikeprint.trackaggregate.general;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,13 +12,13 @@ import com.infomatiq.jsi.Rectangle;
 import com.infomatiq.jsi.SpatialIndex;
 import com.infomatiq.jsi.rtree.RTree;
 
-import nl.bikeprint.trackaggregate.aggregeerMapmatching.Punt;
-import nl.bikeprint.trackaggregate.algemeen.GoudmapLine;
+import nl.bikeprint.trackaggregate.aggregegationMethods.mapmatching.DPoint;
+import nl.bikeprint.trackaggregate.general.GoudmapLine;
 
 public class GoudmapSpatialIndex {
      
     private SpatialIndex rTree = new RTree();
-    private HashMap<Integer,GoudmapLine> goudmapLines = new HashMap<Integer,GoudmapLine>();
+    private HashMap<Integer, GoudmapLine> goudmapLines = new HashMap<Integer, GoudmapLine>();
     
     public GoudmapSpatialIndex() {
     	rTree.init(null);
@@ -39,7 +39,7 @@ public class GoudmapSpatialIndex {
         TIntProcedure proc = new TIntProcedure() {
             @Override
             public boolean execute(int i) {
-            	double afstand = goudmapLines.get(i).distancenum(new Punt(x, y));
+            	double afstand = goudmapLines.get(i).distancenum(new DPoint(x, y));
                 if (afstand <= maxAfstand) {
             	    map.put(afstand, i);
                 }

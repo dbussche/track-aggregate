@@ -1,4 +1,4 @@
-package nl.bikeprint.trackaggregate.aggregeerMapmatching;
+package nl.bikeprint.trackaggregate.aggregegationMethods.mapmatching;
 
 public class DLink {
 

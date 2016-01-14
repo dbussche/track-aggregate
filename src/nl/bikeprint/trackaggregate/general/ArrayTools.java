@@ -1,4 +1,4 @@
-package nl.bikeprint.trackaggregate.algemeen;
+package nl.bikeprint.trackaggregate.general;
 
 public class ArrayTools {
     public static int[] add(int[] inArr, int toevoegen) {
@@ -70,7 +70,7 @@ public class ArrayTools {
 		}
 		return false;
 	}
-	public static int[] addAlsNietInLijst(int[] inArr, int toevoegen) {
+	public static int[] addIfNotInList(int[] inArr, int toevoegen) {
 		if (!isInLijst(inArr, toevoegen)) {
 			return add(inArr, toevoegen);
 		} else {
@@ -78,7 +78,7 @@ public class ArrayTools {
 		}    
 	}
 
-	public static int[] verwijder(int[] arr, int verwijderen) {
+	public static int[] delete(int[] arr, int verwijderen) {
 		if (isInLijst(arr, verwijderen)) {
 			int[] terug = new int[arr.length - 1];
 			int i = 0;

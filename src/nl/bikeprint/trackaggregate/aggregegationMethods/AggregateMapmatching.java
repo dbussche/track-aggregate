@@ -1,4 +1,4 @@
-package aggregate.aggregatieMethoden;
+package nl.bikeprint.trackaggregate.aggregegationMethods;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -8,30 +8,30 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import aggregate.BikePrintTabelSchrijver;
-import nl.bikeprint.trackaggregate.aggregeerMapmatching.DLink;
-import nl.bikeprint.trackaggregate.aggregeerMapmatching.Dijkstra2;
-import nl.bikeprint.trackaggregate.aggregeerMapmatching.KnoopAttributen;
-import nl.bikeprint.trackaggregate.aggregeerMapmatching.LinkAttributen;
-import nl.bikeprint.trackaggregate.aggregeerMapmatching.Punt;
-import nl.bikeprint.trackaggregate.aggregeerMapmatching.RouteAntwoord;
-import nl.bikeprint.trackaggregate.algemeen.BasicWFSReader;
-import nl.bikeprint.trackaggregate.algemeen.Constanten;
-import nl.bikeprint.trackaggregate.algemeen.KolomType;
-import nl.bikeprint.trackaggregate.algemeen.Tools;
-import nl.bikeprint.trackaggregate.shared.AggregeerInterface;
-import nl.bikeprint.trackaggregate.shared.DatabaseSchrijverInterface;
+import nl.bikeprint.trackaggregate.aggregegationMethods.mapmatching.DLink;
+import nl.bikeprint.trackaggregate.aggregegationMethods.mapmatching.Dijkstra2;
+import nl.bikeprint.trackaggregate.aggregegationMethods.mapmatching.NodeAttributes;
+import nl.bikeprint.trackaggregate.aggregegationMethods.mapmatching.LinkAttributes;
+import nl.bikeprint.trackaggregate.aggregegationMethods.mapmatching.DPoint;
+import nl.bikeprint.trackaggregate.aggregegationMethods.mapmatching.RouteAnswer;
+import nl.bikeprint.trackaggregate.general.BasicWFSReader;
+import nl.bikeprint.trackaggregate.general.Constants;
+import nl.bikeprint.trackaggregate.general.ColumnType;
+import nl.bikeprint.trackaggregate.general.Tools;
+import nl.bikeprint.trackaggregate.shared.AggregationInterface;
+import nl.bikeprint.trackaggregate.shared.DatabaseWriterInterface;
 import nl.bikeprint.trackaggregate.shared.GPSTrack;
+import nl.bikeprint.trackaggregate.shared.TableWriter;
 
-public class AggregeerMapmatching implements AggregeerInterface {
+public class AggregateMapmatching implements AggregationInterface {
 
 	private Dijkstra2 dijkstra;
-	LinkAttributen[] linkAttributen = null;
-	KnoopAttributen[] knoopAttributen = null;
-	private DatabaseSchrijverInterface databaseSchrijver;
+	LinkAttributes[] linkAttributen = null;
+	NodeAttributes[] knoopAttributen = null;
+	private DatabaseWriterInterface databaseSchrijver;
 
 	@Override
-	public void init(DatabaseSchrijverInterface databaseSchrijver, String bbox) {
+	public void init(DatabaseWriterInterface databaseSchrijver, String bbox) {
         this.databaseSchrijver = databaseSchrijver;
 		String getCapabilities = 
 	            "http://hez04.goudmap.info:8080/geoserver/gc/ows?service=WFS";
@@ -71,29 +71,29 @@ public class AggregeerMapmatching implements AggregeerInterface {
 				 				wkt = node4.getTextContent(); 
 				 			}
 				 			if (node4.getNodeName().equals("gc:nodea")) {
-				 				nodea = Tools.maakInt(node4.getTextContent());
+				 				nodea = Tools.makeInt(node4.getTextContent());
 				 			}
 				 			if (node4.getNodeName().equals("gc:nodeb")) {
-				 				nodeb = Tools.maakInt(node4.getTextContent());
+				 				nodeb = Tools.makeInt(node4.getTextContent());
 				 			}
 				 			if (node4.getNodeName().equals("gc:linknummer")) {
-				 				linknummer = Tools.maakInt(node4.getTextContent());
+				 				linknummer = Tools.makeInt(node4.getTextContent());
 				 			}
 				 			if (node4.getNodeName().equals("gc:x1")) {
-				 				x1 = Tools.maakFloat(node4.getTextContent());
+				 				x1 = Tools.makeFloat(node4.getTextContent());
 				 			}
 				 			if (node4.getNodeName().equals("gc:x2")) {
-				 				x2 = Tools.maakFloat(node4.getTextContent());
+				 				x2 = Tools.makeFloat(node4.getTextContent());
 				 			}
 				 			if (node4.getNodeName().equals("gc:y1")) {
-				 				y1 = Tools.maakFloat(node4.getTextContent());
+				 				y1 = Tools.makeFloat(node4.getTextContent());
 				 			}
 				 			if (node4.getNodeName().equals("gc:y2")) {
-				 				y2 = Tools.maakFloat(node4.getTextContent());
+				 				y2 = Tools.makeFloat(node4.getTextContent());
 				 			}				 			
 
 				 			if (node4.getNodeName().equals("gc:lengte")) {
-				 				lengte = Tools.maakFloat(node4.getTextContent());
+				 				lengte = Tools.makeFloat(node4.getTextContent());
 				 			}				 							 				
 						}
 						if (linknummer > 0) {
@@ -104,8 +104,8 @@ public class AggregeerMapmatching implements AggregeerInterface {
 				}
 			}
 			System.err.println("Aantal " + dijkstra.aantKnopen);
-			linkAttributen = new LinkAttributen[dijkstra.links.size()];
-			knoopAttributen = new KnoopAttributen[dijkstra.links.size() * 2];	
+			linkAttributen = new LinkAttributes[dijkstra.links.size()];
+			knoopAttributen = new NodeAttributes[dijkstra.links.size() * 2];	
 		} catch (MalformedURLException e) {
 			System.err.println("URL " + getCapabilities + "is geen geldige URL.");
 			e.printStackTrace();
@@ -119,8 +119,8 @@ public class AggregeerMapmatching implements AggregeerInterface {
         if ((gpsTrack.getAantal() == 0) ||  (gpsTrack.getModality() != 2)) {
         	return;        	
         }
-        RouteAntwoord[] links = match(gpsTrack);
-		RouteAntwoord gematchteRoute = links[0];
+        RouteAnswer[] links = match(gpsTrack);
+		RouteAnswer gematchteRoute = links[0];
 		double trackLengte = gpsTrack.getLengte() / 1000;
 		double trackVerhoudingHemelsbreed = trackLengte / (gpsTrack.getHemelsbredeLengte() / 1000);
 		double trackTijd = gpsTrack.getTotaleTijd() / 1000 / 3600;
@@ -139,7 +139,7 @@ public class AggregeerMapmatching implements AggregeerInterface {
         	linkIndex = dijkstra.linknummersReverse.get(Math.abs(linkNummer));
 
         	if (linkAttributen[linkIndex] == null) {
-        		linkAttributen[linkIndex] = new LinkAttributen();
+        		linkAttributen[linkIndex] = new LinkAttributes();
         	}
         	addIntensiteit(linkIndex);
         	addVerhoudingHemelsbreed(linkIndex, trackVerhoudingHemelsbreed);
@@ -156,20 +156,20 @@ public class AggregeerMapmatching implements AggregeerInterface {
        // LoginDatabase.execUpdate(query.toString());
 	 
 
-		RouteAntwoord kortsteRoute = links[1];
+		RouteAnswer kortsteRoute = links[1];
         for (int i = 0; i < kortsteRoute.getLinkList().length; i++) {
         	linkNummer = kortsteRoute.getLinkList()[i];
         	linkIndex = dijkstra.linknummersReverse.get(Math.abs(linkNummer));
 
         	if (linkAttributen[linkIndex] == null) {
-        		linkAttributen[linkIndex] = new LinkAttributen();
+        		linkAttributen[linkIndex] = new LinkAttributes();
         	}
         	addIntensiteitKortsteRoute(linkIndex);
         }
 	}
 
 	@Override
-	public void schrijfNaarDatabase() {
+	public void exit() {
 		schrijfFietsnet();
 		schrijfLinkattributen();		
 	}
@@ -212,40 +212,40 @@ public class AggregeerMapmatching implements AggregeerInterface {
 	}
 	*/
 	private void schrijfLinkattributen() {
-		BikePrintTabelSchrijver tabel = new BikePrintTabelSchrijver("linkattributen");
-		tabel.addKolom("linknummer", KolomType.INTEGER);
-		tabel.addKolom("snelheid", KolomType.FLOAT);
-		tabel.addKolom("snelheid_relatief", KolomType.FLOAT);
-		tabel.addKolom("intensiteit", KolomType.INTEGER);
-		tabel.addKolom("intensiteit_kortsteroute", KolomType.INTEGER);
-		tabel.addKolom("verhouding_hemelsbreed", KolomType.INTEGER);
-		databaseSchrijver.maakTabel(tabel);
+		TableWriter tabel = new TableWriter("linkattributen");
+		tabel.addKolom("linknummer", ColumnType.INTEGER);
+		tabel.addKolom("snelheid", ColumnType.FLOAT);
+		tabel.addKolom("snelheid_relatief", ColumnType.FLOAT);
+		tabel.addKolom("intensiteit", ColumnType.INTEGER);
+		tabel.addKolom("intensiteit_kortsteroute", ColumnType.INTEGER);
+		tabel.addKolom("verhouding_hemelsbreed", ColumnType.INTEGER);
+		databaseSchrijver.createTable(tabel);
 		
 		ArrayList<ArrayList<String>> waardes = new ArrayList<ArrayList<String>>();
 		for (int i = 0; i < linkAttributen.length; i++) {
 			ArrayList<String> waarde = new ArrayList<String>();
 			if (linkAttributen[i] != null) {
 				waarde.add(dijkstra.linknummers.get(i) + "");
-				waarde.add(Tools.maakNaN0(linkAttributen[i].snelheidSum / linkAttributen[i].getSnelheidN()) + "");
-				waarde.add(Tools.maakNaN0(linkAttributen[i].getSnelheidSumRelatief() / linkAttributen[i].getSnelheidN()) + "");
+				waarde.add(Tools.makeNaN0(linkAttributen[i].snelheidSum / linkAttributen[i].getSnelheidN()) + "");
+				waarde.add(Tools.makeNaN0(linkAttributen[i].getSnelheidSumRelatief() / linkAttributen[i].getSnelheidN()) + "");
 				waarde.add(linkAttributen[i].aantal + "");
 				waarde.add(linkAttributen[i].aantalKortsteRoute + "");
-				waarde.add(Tools.maakNaN0(linkAttributen[i].verhoudingHemelsbreed / linkAttributen[i].aantal) + "");
+				waarde.add(Tools.makeNaN0(linkAttributen[i].verhoudingHemelsbreed / linkAttributen[i].aantal) + "");
 				waardes.add(waarde);			
 			} else {
 				System.out.println("linkattributen["+ i +"] is NULL");
 			}
 		} 
-		databaseSchrijver.schrijfRecords(tabel, waardes);
+		databaseSchrijver.writeRecords(tabel, waardes);
 	}
 
 	private void schrijfFietsnet() {
-		BikePrintTabelSchrijver tabel = new BikePrintTabelSchrijver("fietsnet");
-		tabel.addKolom("linknummer", KolomType.INTEGER);
-		tabel.addKolom("nodea", KolomType.INTEGER);
-		tabel.addKolom("nodeb", KolomType.INTEGER);
-		tabel.addKolom("geometry", KolomType.GEOMETRY);
-		databaseSchrijver.maakTabel(tabel);
+		TableWriter tabel = new TableWriter("fietsnet");
+		tabel.addKolom("linknummer", ColumnType.INTEGER);
+		tabel.addKolom("nodea", ColumnType.INTEGER);
+		tabel.addKolom("nodeb", ColumnType.INTEGER);
+		tabel.addKolom("geometry", ColumnType.GEOMETRY);
+		databaseSchrijver.createTable(tabel);
 		
 		ArrayList<ArrayList<String>> waardes = new ArrayList<ArrayList<String>>();
 		for (int i = 0; i < dijkstra.aantKnopen; i++) {
@@ -260,11 +260,11 @@ public class AggregeerMapmatching implements AggregeerInterface {
 				waardes.add(waarde);
 			}
 		}
-		databaseSchrijver.schrijfRecords(tabel, waardes);
+		databaseSchrijver.writeRecords(tabel, waardes);
 	}
 
-	private RouteAntwoord[] match(GPSTrack gpsTrack) {
-		RouteAntwoord route;
+	private RouteAnswer[] match(GPSTrack gpsTrack) {
+		RouteAnswer route;
 		int aantal = gpsTrack.getAantal();
 		ArrayList<Integer> beginNodes = dijkstra.getNodes(gpsTrack.getNode(0).getX(), gpsTrack.getNode(0).getY(), 1000);
 		ArrayList<Integer> endNodes   = dijkstra.getNodes(gpsTrack.getNode(aantal-1).getX(), gpsTrack.getNode(aantal-1).getY(), 1000);
@@ -272,8 +272,8 @@ public class AggregeerMapmatching implements AggregeerInterface {
 		double afwijking;
 		double minAfwijking = 999999999;
 		int minI = 0, minJ = 0;
-		RouteAntwoord minRoute = new RouteAntwoord(new int[0], 0, 0);
-		RouteAntwoord kortsteRoute;
+		RouteAnswer minRoute = new RouteAnswer(new int[0], 0, 0);
+		RouteAnswer kortsteRoute;
 		
 		dijkstra.resetAfstanden();
 		for (int i = 0; i < beginNodes.size(); i++) {
@@ -296,10 +296,10 @@ public class AggregeerMapmatching implements AggregeerInterface {
         if ((minRoute.getLengte() > 5 * kortsteRoute.getLengte()) || (minRoute.getLengte() < 500)) {
         	return null;
         }
-	    return new RouteAntwoord[]{minRoute,kortsteRoute};
+	    return new RouteAnswer[]{minRoute,kortsteRoute};
 	}
 
-	private double matchKwaliteit(RouteAntwoord route, GPSTrack gpsTrack) {
+	private double matchKwaliteit(RouteAnswer route, GPSTrack gpsTrack) {
 		return route.getKosten();
 	}
 	private void addIntensiteit(int linkIndex) {
@@ -318,8 +318,8 @@ private double addSnelheid(int linkIndex, int linkNummer, DLink dLink, GPSTrack 
 		
 		boolean gedraaid = false;
 		
-		Punt punt1 = new Punt(dLink.getX1(), dLink.getY1());
-		Punt punt2 = new Punt(dLink.getX2(), dLink.getY2());
+		DPoint punt1 = new DPoint(dLink.getX1(), dLink.getY1());
+		DPoint punt2 = new DPoint(dLink.getX2(), dLink.getY2());
 
 		double begin = gpsTrack.getTijdAt(punt1);
 		double eind  = gpsTrack.getTijdAt(punt2);
@@ -334,7 +334,7 @@ private double addSnelheid(int linkIndex, int linkNummer, DLink dLink, GPSTrack 
 		if (eind > begin) {
             double km;
           //  km = (int)dLink.lengte;
-            km = gpsTrack.getLengteTussen(punt1, punt2) / Constanten.GOOGLE_FACTOR;
+            km = gpsTrack.getLengteTussen(punt1, punt2) / Constants.GOOGLE_FACTOR;
             double uur = (eind - begin) / 1000 / 3600;
        //     if (km/uur>30) {
        //         System.out.println("te hoge snelheid: " + km/uur);
@@ -361,28 +361,28 @@ private double addSnelheid(int linkIndex, int linkNummer, DLink dLink, GPSTrack 
 	private void addKnoopTijd(int linkIndex, DLink dLink, GPSTrack gpsTrack, boolean gedraaid, double linkSnelheid) {
 	
 		int knoopnummer;
-		Punt knoopPunt;
+		DPoint knoopPunt;
 		if (gedraaid) {
 		    knoopnummer = dLink.nodeb;
-		    knoopPunt = new Punt(dLink.getX2(), dLink.getY2());
+		    knoopPunt = new DPoint(dLink.getX2(), dLink.getY2());
 		} else {
 			knoopnummer = dLink.nodea;
-			knoopPunt = new Punt(dLink.getX1(), dLink.getY1());;
+			knoopPunt = new DPoint(dLink.getX1(), dLink.getY1());;
 		}
 	
 		double loopLengte = gpsTrack.getLine().getAlong(knoopPunt);
 	
-	    Punt puntPlus50   = gpsTrack.getLine().along(loopLengte + ( 50D / 1000D * Constanten.GOOGLE_FACTOR), false);
-	    Punt puntMinus50  = gpsTrack.getLine().along(loopLengte - ( 50D / 1000D * Constanten.GOOGLE_FACTOR), false);
-	    Punt puntPlus100  = gpsTrack.getLine().along(loopLengte + (100D / 1000D * Constanten.GOOGLE_FACTOR), false);
-	    Punt puntMinus100 = gpsTrack.getLine().along(loopLengte - (100D / 1000D * Constanten.GOOGLE_FACTOR), false);
+	    DPoint puntPlus50   = gpsTrack.getLine().along(loopLengte + ( 50D / 1000D * Constants.GOOGLE_FACTOR), false);
+	    DPoint puntMinus50  = gpsTrack.getLine().along(loopLengte - ( 50D / 1000D * Constants.GOOGLE_FACTOR), false);
+	    DPoint puntPlus100  = gpsTrack.getLine().along(loopLengte + (100D / 1000D * Constants.GOOGLE_FACTOR), false);
+	    DPoint puntMinus100 = gpsTrack.getLine().along(loopLengte - (100D / 1000D * Constants.GOOGLE_FACTOR), false);
 	    
 		double tijdKnooppunt = (gpsTrack.getTijdAt(puntPlus50 ) - gpsTrack.getTijdAt(puntMinus50 )) / 1000;
 		double tijdVoor =      (gpsTrack.getTijdAt(puntMinus50) - gpsTrack.getTijdAt(puntMinus100)) / 1000;
 		double tijdNa =        (gpsTrack.getTijdAt(puntPlus100) - gpsTrack.getTijdAt(puntPlus50  )) / 1000;
 		//double fiktieveTijd = 0.2 / linkSnelheid / 1000 / 3600;
 	    if (knoopAttributen[knoopnummer] == null) {
-			knoopAttributen[knoopnummer] = new KnoopAttributen(knoopPunt.x,knoopPunt.y, dijkstra.knopenIndexReverse.get(knoopnummer));
+			knoopAttributen[knoopnummer] = new NodeAttributes(knoopPunt.x,knoopPunt.y, dijkstra.knopenIndexReverse.get(knoopnummer));
 		}
 	    knoopAttributen[knoopnummer].tijd += tijdKnooppunt - 2 * Math.min(15, Math.min(tijdVoor, tijdNa));
 	    knoopAttributen[knoopnummer].tijdOp += tijdKnooppunt;

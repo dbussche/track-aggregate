@@ -1,4 +1,4 @@
-package aggregate;
+package demoAggregate;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
-import nl.bikeprint.trackaggregate.aggregeerMapmatching.Punt;
-import nl.bikeprint.trackaggregate.algemeen.Constanten;
-import nl.bikeprint.trackaggregate.algemeen.GoudmapLine;
+import nl.bikeprint.trackaggregate.aggregegationMethods.mapmatching.DPoint;
+import nl.bikeprint.trackaggregate.general.Constants;
+import nl.bikeprint.trackaggregate.general.GoudmapLine;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -18,7 +18,7 @@ public class GPSTrack {
     public final static double DREMPEL_AFSTAND_BEGIN_EIND = 0.3;    // 0.3 km = 300 meter
     public final static long DREMPEL_TIJD_SPLITSEN = 3 * 60 * 1000; // 3 minuten in milliseconden
     public final static double DREMPEL_AFSTAND_SPLITSEN = 0.2;      // 0.2 km = 200 meter
-    private ArrayList<GPSPunt> gpsArray = new ArrayList<GPSPunt>();
+    private ArrayList<GPSPoint> gpsArray = new ArrayList<GPSPoint>();
     private int routeID;
     private boolean isSet = false;
     private Integer beginUur = null;
@@ -58,9 +58,9 @@ public class GPSTrack {
         double uur = 0;
         boolean onbetrouwbaar = false;
 		if (l > 0) {
-			GPSPunt laatstePunt = gpsArray.get(l - 1);
-			km = GoudmapLine.distance_2_Points(x, y, laatstePunt.getX(), laatstePunt.getY()) / Constanten.GOOGLE_FACTOR;
-            uur = (double)(date.getTime() - laatstePunt.getTijd()) / 1000 / 3600;
+			GPSPoint laatstePunt = gpsArray.get(l - 1);
+			km = GoudmapLine.distance_2_Points(x, y, laatstePunt.getX(), laatstePunt.getY()) / Constants.GOOGLE_FACTOR;
+            uur = (double)(date.getTime() - laatstePunt.getTime()) / 1000 / 3600;
             berekendeSnelheid = km / uur;
             onbetrouwbaar = (km > 0.1 && berekendeSnelheid > 50) || (km > 1 && berekendeSnelheid > 30) || (km > 2);
             if (onbetrouwbaar) {
@@ -68,7 +68,7 @@ public class GPSTrack {
             }                
 		}	
 		if (!onbetrouwbaar) {
-		    gpsArray.add(new GPSPunt(x, y, snelheid, date));
+		    gpsArray.add(new GPSPoint(x, y, snelheid, date));
 		}    
 
 		cacheLine = null;
@@ -82,7 +82,7 @@ public class GPSTrack {
 		return gpsArray.size();
 	}
 	
-	public GPSPunt getNode(int i) {
+	public GPSPoint getNode(int i) {
 		if (i < 0 || i >= gpsArray.size()) {
 			return null;
 		} else {
@@ -100,11 +100,11 @@ public class GPSTrack {
 
 	public GoudmapLine getLine() {
 		if (cacheLine == null) {
-			ArrayList<Punt> arr_vertices = new ArrayList<Punt>();
-			GPSPunt gpsPoint;
+			ArrayList<DPoint> arr_vertices = new ArrayList<DPoint>();
+			GPSPoint gpsPoint;
 			for (int i = 0; i < getAantal(); i++) {
 				gpsPoint = gpsArray.get(i);
-			    arr_vertices.add(new Punt(gpsPoint.getX(),gpsPoint.getY()));
+			    arr_vertices.add(new DPoint(gpsPoint.getX(),gpsPoint.getY()));
 			}
 			cacheLine = new GoudmapLine(arr_vertices);
 		}
@@ -112,27 +112,27 @@ public class GPSTrack {
 	}
 
 	public double getLengte() {
-		return getLine().length() / Constanten.GOOGLE_FACTOR;
+		return getLine().length() / Constants.GOOGLE_FACTOR;
 	}
 	
 
 	public double getHemelsbredeLengte() {
-		GPSPunt eindNode = getNode(getAantal() - 1);
-		GPSPunt beginNode = getNode(0);
+		GPSPoint eindNode = getNode(getAantal() - 1);
+		GPSPoint beginNode = getNode(0);
 		if (eindNode != null && beginNode != null) {
-		    return GoudmapLine.distance_2_Points(eindNode.toPunt(),  beginNode.toPunt()) / Constanten.GOOGLE_FACTOR;
+		    return GoudmapLine.distance_2_Points(eindNode.toPoint(),  beginNode.toPoint()) / Constants.GOOGLE_FACTOR;
 		} else {
 			return 0;
 		}
 	} 
 	
-	public double getTijdAt(Punt punt) {
+	public double getTijdAt(DPoint punt) {
 		double[] arr = getLine().distanceVertexAandeel(punt);
 		long tijd = 0;
-		long tijdA = getNode((int)arr[0]).getTijd();
+		long tijdA = getNode((int)arr[0]).getTime();
 		
 		if (arr[1] > 0) {
-			long tijdB = getNode((int)arr[0] + 1).getTijd();
+			long tijdB = getNode((int)arr[0] + 1).getTime();
 			tijd = (long)(tijdA + (tijdB - tijdA) * arr[1]);
 		} else {
 			tijd = tijdA;
@@ -140,8 +140,8 @@ public class GPSTrack {
 		return tijd;
 	}
 	
-	public Punt getPuntAtTijd(long tijd) {
-		GPSPunt gpsPoint,gpsPointA,gpsPointB;
+	public DPoint getPuntAtTijd(long tijd) {
+		GPSPoint gpsPoint,gpsPointA,gpsPointB;
 		int i;
 		if (getAantal() < 2) return null;
 		long atijd = gpsArray.get(0).getTimeOfDay();
@@ -155,28 +155,28 @@ public class GPSTrack {
 				break;
 			}
 		}
-		if (i == getAantal()) return new Punt(gpsArray.get(i - 1).getX(),gpsArray.get(i - 1).getY(),gpsArray.get(i - 1).getSnelheid()) ; 
+		if (i == getAantal()) return new DPoint(gpsArray.get(i - 1).getX(),gpsArray.get(i - 1).getY(),gpsArray.get(i - 1).getSpeed()) ; 
 		gpsPointB = gpsArray.get(i);
 		gpsPointA = gpsArray.get(i - 1);
 		double verhouding = (tijd - gpsPointA.getTimeOfDay()) / (gpsPointB.getTimeOfDay() - gpsPointA.getTimeOfDay());
 	
-		return new Punt(
+		return new DPoint(
 				gpsPointA.getX() + verhouding * (gpsPointB.getX() - gpsPointA.getX()),
 				gpsPointA.getY() + verhouding * (gpsPointB.getY() - gpsPointA.getY()),
-				gpsPointA.getSnelheid() + verhouding * (gpsPointB.getSnelheid() - gpsPointA.getSnelheid()));
+				gpsPointA.getSpeed() + verhouding * (gpsPointB.getSpeed() - gpsPointA.getSpeed()));
 	}
 	
 	public double getTotaleTijd() {
-		GPSPunt eindNode = getNode(getAantal() - 1);
-		GPSPunt beginNode = getNode(getAantal() - 1);
+		GPSPoint eindNode = getNode(getAantal() - 1);
+		GPSPoint beginNode = getNode(getAantal() - 1);
 		if (eindNode != null && beginNode != null) {
-		    return getNode(getAantal() - 1).getTijd() - getNode(0).getTijd();
+		    return getNode(getAantal() - 1).getTime() - getNode(0).getTime();
 		} else {
 			return 0;
 		}
 	}
 
-	public double getLengteTussen(Punt punt1, Punt punt2) {
+	public double getLengteTussen(DPoint punt1, DPoint punt2) {
 		return getLine().getLengteTussen(punt1, punt2);
 	}	
 
@@ -234,7 +234,7 @@ public class GPSTrack {
 	}
 
 	private double getSnelheid() {
-        double uur = (double)(getNode(getAantal() - 1).getTijd() - getNode(0).getTijd()) / 1000 / 3600;
+        double uur = (double)(getNode(getAantal() - 1).getTime() - getNode(0).getTime()) / 1000 / 3600;
         return getLengte() / uur;
 	}
 
@@ -255,9 +255,9 @@ public class GPSTrack {
 	}
 
 	public void filterBeginEnd() {
-		GPSPunt gpsPoint;	
-		GPSPunt beginPoint = getNode(0);
-		GPSPunt eindPoint = getNode(getAantal() - 1);
+		GPSPoint gpsPoint;	
+		GPSPoint beginPoint = getNode(0);
+		GPSPoint eindPoint = getNode(getAantal() - 1);
 		int drempelBegin = 0;
 		int drempelEind = getAantal();
 		
@@ -266,8 +266,8 @@ public class GPSTrack {
 		double drempel_eind = DREMPEL_AFSTAND_BEGIN_EIND * random.nextDouble();
 		for (int i = 0; i < getAantal(); i++) {
 			gpsPoint = getNode(i);
-			double kmBegin = GoudmapLine.distance_2_Points(gpsPoint.getX(), gpsPoint.getY(), beginPoint.getX(), beginPoint.getY()) / Constanten.GOOGLE_FACTOR;
-			double kmEind  = GoudmapLine.distance_2_Points(gpsPoint.getX(), gpsPoint.getY(), eindPoint.getX(),  eindPoint.getY())  / Constanten.GOOGLE_FACTOR;
+			double kmBegin = GoudmapLine.distance_2_Points(gpsPoint.getX(), gpsPoint.getY(), beginPoint.getX(), beginPoint.getY()) / Constants.GOOGLE_FACTOR;
+			double kmEind  = GoudmapLine.distance_2_Points(gpsPoint.getX(), gpsPoint.getY(), eindPoint.getX(),  eindPoint.getY())  / Constants.GOOGLE_FACTOR;
 		    if (kmBegin < drempel_begin) {
 		    	drempelBegin = i;
 		    }
@@ -275,10 +275,10 @@ public class GPSTrack {
 		    	drempelEind = i;		    	
 		    }
 		}
-	    ArrayList<GPSPunt> nieuwGpsArray = new ArrayList<GPSPunt>();
+	    ArrayList<GPSPoint> nieuwGpsArray = new ArrayList<GPSPoint>();
 	    for (int i = drempelBegin + 1; i < drempelEind - 1; i++) {
 			gpsPoint = getNode(i);			
-	        nieuwGpsArray.add(new GPSPunt(gpsPoint.getX(), gpsPoint.getY(), gpsPoint.getSnelheid(), gpsPoint.getDate()));
+	        nieuwGpsArray.add(new GPSPoint(gpsPoint.getX(), gpsPoint.getY(), gpsPoint.getSpeed(), gpsPoint.getDate()));
 	    }
 	    gpsArray = nieuwGpsArray;
 	    cacheLine = null;
@@ -295,17 +295,17 @@ public class GPSTrack {
 	}
 	
 	public GPSTrack[] splitsAlsNodigBinnen() {
-		GPSPunt gpsPoint, centraalPunt;
+		GPSPoint gpsPoint, centraalPunt;
 		long centraalTijd;
     	int splitsPunt = -1;
 		for (int i = 0; i < getAantal(); i++) {
 			centraalPunt = getNode(i);
-		    centraalTijd = centraalPunt.getTijd();
+		    centraalTijd = centraalPunt.getTime();
 		    int laatstDichtbij = 0;
 		    for (int t = 0; t < getAantal(); t++) {
 		    	gpsPoint = getNode(t);
-		    	if (Math.abs(centraalTijd - gpsPoint.getTijd()) > DREMPEL_TIJD_SPLITSEN) {
-                    double km = GoudmapLine.distance_2_Points(gpsPoint.getX(), gpsPoint.getY(), centraalPunt.getX(), centraalPunt.getY()) / Constanten.GOOGLE_FACTOR;
+		    	if (Math.abs(centraalTijd - gpsPoint.getTime()) > DREMPEL_TIJD_SPLITSEN) {
+                    double km = GoudmapLine.distance_2_Points(gpsPoint.getX(), gpsPoint.getY(), centraalPunt.getX(), centraalPunt.getY()) / Constants.GOOGLE_FACTOR;
                     if (km < DREMPEL_AFSTAND_SPLITSEN) {
                     	laatstDichtbij = t;    	
                     }
@@ -315,12 +315,12 @@ public class GPSTrack {
 		    	// zoek punt op maximale afstand van i an laatstDichtbij; 
 		    	// bij "gewoon" oponthoud is dat een toevallige punt van de wolk van tussenstop
 		    	// bij twee keer langs dezelfde punt lopen is dat het uiteinde van de "doodlopende" weg
-		    	GPSPunt laatstPoint = getNode(laatstDichtbij);
+		    	GPSPoint laatstPoint = getNode(laatstDichtbij);
 		    	double maxAfstand = 0;
 			    for (int j = 0; j < getAantal(); j++) {
 			    	gpsPoint = getNode(j);			    	
-	                double km = GoudmapLine.distance_2_Points(gpsPoint.getX(), gpsPoint.getY(), centraalPunt.getX(), centraalPunt.getY()) / Constanten.GOOGLE_FACTOR;
-	                      km += GoudmapLine.distance_2_Points(gpsPoint.getX(), gpsPoint.getY(), laatstPoint.getX(),  laatstPoint.getY())  / Constanten.GOOGLE_FACTOR;
+	                double km = GoudmapLine.distance_2_Points(gpsPoint.getX(), gpsPoint.getY(), centraalPunt.getX(), centraalPunt.getY()) / Constants.GOOGLE_FACTOR;
+	                      km += GoudmapLine.distance_2_Points(gpsPoint.getX(), gpsPoint.getY(), laatstPoint.getX(),  laatstPoint.getY())  / Constants.GOOGLE_FACTOR;
 	                if (km > maxAfstand) {
 	                	maxAfstand = km;
 	                	splitsPunt = j;    		                 
@@ -338,9 +338,9 @@ public class GPSTrack {
 			for (int i = 0; i < getAantal(); i++) {
 				gpsPoint = getNode(i);
 				if (i < splitsPunt) {
-					deel1.add(gpsPoint.getX(), gpsPoint.getY(), gpsPoint.getSnelheid(), gpsPoint.getDateString());
+					deel1.add(gpsPoint.getX(), gpsPoint.getY(), gpsPoint.getSpeed(), gpsPoint.getDateString());
 				} else {
-				    deel2.add(gpsPoint.getX(), gpsPoint.getY(), gpsPoint.getSnelheid(), gpsPoint.getDateString());
+				    deel2.add(gpsPoint.getX(), gpsPoint.getY(), gpsPoint.getSpeed(), gpsPoint.getDateString());
 				}    
 			}
 			//deel1.setRouteID(this.getRouteID());
@@ -394,7 +394,7 @@ public class GPSTrack {
 		 */
 		Double[] sortSnelheden = new Double[gpsArray.size()];
 		for (int i = 0; i < gpsArray.size(); i++) {
-			sortSnelheden[i] = gpsArray.get(i).getSnelheid();
+			sortSnelheden[i] = gpsArray.get(i).getSpeed();
 		}
 		return getPercentilArray(sortSnelheden, n);
 
@@ -411,24 +411,24 @@ public class GPSTrack {
 		return sortSnelheden[element];
 	}
 
-	public double getPercentilSnelheid(Punt middenpunt, double radius, int n) {
+	public double getPercentilSnelheid(DPoint middenpunt, double radius, int n) {
         Double[] sortSnelheden = getSnelhedenBinnenAfstand(middenpunt, radius);
 		return getPercentilArray(sortSnelheden, n);
 	}
 
-	private Double[] getSnelhedenBinnenAfstand(Punt middenpunt, double radius) {
+	private Double[] getSnelhedenBinnenAfstand(DPoint middenpunt, double radius) {
 		ArrayList<Double> snelhedenList = new ArrayList<Double>();
 		for (int i = 0; i < gpsArray.size(); i++) {
-			GPSPunt gpsPunt = gpsArray.get(i);
+			GPSPoint gpsPunt = gpsArray.get(i);
 			if (gpsPunt.distance(middenpunt) <= radius) {
-			    snelhedenList.add(gpsArray.get(i).getSnelheid());
+			    snelhedenList.add(gpsArray.get(i).getSpeed());
 			}
 		}
 	//	Double[] sortSnelheden = new Double[];
 		return snelhedenList.toArray(new Double[snelhedenList.size()]);		 
 	}
 
-	public double getVariatieSnelheid(Punt middenpunt, double radius, double maximum) {
+	public double getVariatieSnelheid(DPoint middenpunt, double radius, double maximum) {
 		Double[] snelheden = getSnelhedenBinnenAfstand(middenpunt, radius);
 		double gemiddelde = getGemiddelde(snelheden, maximum);
 		double sum = 0;

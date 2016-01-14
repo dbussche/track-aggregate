@@ -1,4 +1,4 @@
-package nl.bikeprint.trackaggregate.algemeen;
+package nl.bikeprint.trackaggregate.general;
 
 /*
 BasicWFSReader

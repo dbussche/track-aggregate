@@ -1,6 +1,6 @@
-package nl.bikeprint.trackaggregate.aggregeerMapmatching;
+package nl.bikeprint.trackaggregate.aggregegationMethods.mapmatching;
 
-public class KnoopAttributen {
+public class NodeAttributes {
 
 	public int aantal = 0;
 	public int id = 0;
@@ -11,7 +11,7 @@ public class KnoopAttributen {
     public double x = 0;
     public double y = 0;
 
-    public KnoopAttributen(double x, double y, int id) {
+    public NodeAttributes(double x, double y, int id) {
         this.x = x;
         this.y = y;
         this.id = id;

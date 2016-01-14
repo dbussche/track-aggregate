@@ -1,4 +1,4 @@
-package nl.bikeprint.trackaggregate.aggregeerMapmatching;
+package nl.bikeprint.trackaggregate.aggregegationMethods.mapmatching;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import nl.bikeprint.trackaggregate.algemeen.ArrayTools;
-import nl.bikeprint.trackaggregate.algemeen.GoudmapLine;
-import nl.bikeprint.trackaggregate.algemeen.GoudmapSpatialIndex;
+import nl.bikeprint.trackaggregate.general.ArrayTools;
+import nl.bikeprint.trackaggregate.general.GoudmapLine;
+import nl.bikeprint.trackaggregate.general.GoudmapSpatialIndex;
 import nl.bikeprint.trackaggregate.shared.GPSTrack;
 
 import com.infomatiq.jsi.Point;
@@ -20,7 +20,7 @@ import com.infomatiq.jsi.Point;
 public class Dijkstra2 {
 
     public int aantKnopen = -1;    
-    public HashMap<Integer, DKnoop> knopen = new HashMap<Integer, DKnoop>();
+    public HashMap<Integer, DNode> knopen = new HashMap<Integer, DNode>();
  //  public HashMap<Integer,GoudmapLine> goudmapLines = new HashMap<Integer,GoudmapLine>();
     public HashMap<Integer,DLink> links = new HashMap<Integer,DLink>();
 	public HashMap<Integer, Integer> linknummers = new HashMap<Integer,Integer>();
@@ -182,7 +182,7 @@ public class Dijkstra2 {
 	
 		int i = knopenIndex.get(node);
 		if (knopen.get(i) == null) {			
-	        knopen.put(i, new DKnoop());
+	        knopen.put(i, new DNode());
 	        knopen.get(i).x = x;
 	        knopen.get(i).y = y;
 	        knopen.get(i).databaseKnoopnummer = node;	        
@@ -193,7 +193,7 @@ public class Dijkstra2 {
 
 
  // ##############################################################################   
-    public RouteAntwoord maakRoute(int beg, int eind, GPSTrack gpsTrack)
+    public RouteAnswer maakRoute(int beg, int eind, GPSTrack gpsTrack)
  // ##############################################################################
 
  // gemodificeerde implementatie Routezoekalgoritme van Dijkstra
@@ -207,7 +207,7 @@ public class Dijkstra2 {
       int t;
       int kleinstKnoop, kleinstKost, kleinst_t, aKosten, dezeKosten, eindlistminkosten;
       double afstandKosten;
-      DKnoop kleinstKnoopObject;
+      DNode kleinstKnoopObject;
       ArrayList<Integer> vooraan; // knopen die op de grens van het verkende gebied liggen
       HashMap<Integer,Integer> kosten = new HashMap<Integer,Integer>();
       HashMap<Integer,Integer> vandaanKnoop = new HashMap<Integer,Integer>();
@@ -349,7 +349,7 @@ public class Dijkstra2 {
           if ( t == -1) break;    
       }    
       
-      RouteAntwoord routeAntwoord = new RouteAntwoord(linkList, getIntegerWaarde(kosten, eind, 2147483647), lengte);
+      RouteAnswer routeAntwoord = new RouteAnswer(linkList, getIntegerWaarde(kosten, eind, 2147483647), lengte);
       
       return routeAntwoord;
    }
@@ -496,14 +496,14 @@ public class Dijkstra2 {
         
     private double getAfstandLink(GPSTrack gpsTrack, int x1, int y1) {
     	GoudmapLine line = gpsTrack.getLine();
-    	return line.distancenum(new Punt(x1, y1));	
+    	return line.distancenum(new DPoint(x1, y1));	
     }
 
 	public void resetAfstanden() {
 		afstandWeerstand = new HashMap<Integer,Double>();		
 	}
 
-	public double distanceLinkPunt(int linknummer, Punt punt) {
+	public double distanceLinkPunt(int linknummer, DPoint punt) {
 		if (linknummer < 0) linknummer = -linknummer;
 		GoudmapLine line = spatialIndex.getLine(linknummer);
 		if (line == null) return 999999999;

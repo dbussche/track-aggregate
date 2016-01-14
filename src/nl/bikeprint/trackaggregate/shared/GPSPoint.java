@@ -3,18 +3,18 @@ package nl.bikeprint.trackaggregate.shared;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import nl.bikeprint.trackaggregate.aggregeerMapmatching.Punt;
+import nl.bikeprint.trackaggregate.aggregegationMethods.mapmatching.DPoint;
 
-public class GPSPunt {
+public class GPSPoint {
 	private double x;
     private double y;
-    private double snelheid;
+    private double speed;
     private Date date;
     
-    public GPSPunt(double x, double y, double snelheid, Date date) {
+    public GPSPoint(double x, double y, double speed, Date date) {
 	    this.x = x;
 	    this.y = y;
-	    this.snelheid = snelheid;
+	    this.speed = speed;
 	    this.date = date;
 	}
 
@@ -26,15 +26,15 @@ public class GPSPunt {
     	return y;
     }
 
-    public Punt toPunt() {
-    	return new Punt(x, y);
+    public DPoint toPoint() {
+    	return new DPoint(x, y);
     }
     
-    public double getSnelheid() {
-    	return snelheid;
+    public double getSpeed() {
+    	return speed;
     }
     
-    public long getTijd() {
+    public long getTime() {
     	return date.getTime();
     }
 
@@ -52,7 +52,7 @@ public class GPSPunt {
     	return date;
     }
 
-	public double distance(Punt middenpunt) {
+	public double distance(DPoint middenpunt) {
 		return middenpunt.distance(x,y);		
 	}
 	

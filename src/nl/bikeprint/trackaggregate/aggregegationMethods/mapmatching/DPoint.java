@@ -1,22 +1,22 @@
-package nl.bikeprint.trackaggregate.aggregeerMapmatching;
+package nl.bikeprint.trackaggregate.aggregegationMethods.mapmatching;
 
-public class Punt {
+public class DPoint {
     public double x = 0;
     public double y = 0;
     public double waarde = 0;
 	  
-    public Punt(double x2, double y2) {
+    public DPoint(double x2, double y2) {
         this.x = x2;
         this.y = y2;
     }
 
-	public Punt(double x, double y, double waarde) {
+	public DPoint(double x, double y, double waarde) {
         this.x = x;
         this.y = y;
         this.waarde = waarde;
 	}
 
-	public double distance(Punt p) {
+	public double distance(DPoint p) {
         return distance(p.x, p.y);	
 	}
 	

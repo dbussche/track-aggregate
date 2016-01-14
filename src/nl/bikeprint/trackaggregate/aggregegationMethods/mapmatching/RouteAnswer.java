@@ -1,11 +1,11 @@
-package nl.bikeprint.trackaggregate.aggregeerMapmatching;
+package nl.bikeprint.trackaggregate.aggregegationMethods.mapmatching;
 
-public class RouteAntwoord {
+public class RouteAnswer {
 	int[] linkList;
     int kosten;
     double lengte;
     
-    public RouteAntwoord(int[] linkList, Integer kosten, double lengte) {
+    public RouteAnswer(int[] linkList, Integer kosten, double lengte) {
         this.linkList = linkList;
         if (kosten == null) {
         	this.kosten = 2147483647;

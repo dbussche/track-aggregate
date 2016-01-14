@@ -1,6 +1,6 @@
-package nl.bikeprint.trackaggregate.aggregeerMapmatching;
+package nl.bikeprint.trackaggregate.aggregegationMethods.mapmatching;
 
-public class LinkAttributen {
+public class LinkAttributes {
     public int aantal = 0;
     public int aantalKortsteRoute = 0;
     public double snelheidSum = 0;

@@ -1,6 +1,6 @@
-package nl.bikeprint.trackaggregate.aggregeerMapmatching;
+package nl.bikeprint.trackaggregate.aggregegationMethods.mapmatching;
 
-public class DKnoop {
+public class DNode {
 	  public int databaseKnoopnummer;
 	  public int x = 0;
 	  public int y = 0;
