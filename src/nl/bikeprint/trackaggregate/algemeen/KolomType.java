@@ -11,7 +11,7 @@ public class KolomType {
 	public static final KolomType String = new KolomType(4);
 	public static final KolomType GEOMETRY = new KolomType(5);
 	
-	// toevoegen datumtijd
+	// toevoegen datumtijd gewijzigd
 	
 	private int typenummer;
 	
