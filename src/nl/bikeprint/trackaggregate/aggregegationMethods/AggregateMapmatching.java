@@ -116,6 +116,7 @@ public class AggregateMapmatching implements AggregationInterface {
 	public void add(GPSTrack gpsTrack) {
 		int linkIndex;
 		int linkNummer; 
+		gpsTrack.setModality(2);
         if ((gpsTrack.getAantal() == 0) ||  (gpsTrack.getModality() != 2)) {
         	return;        	
         }
@@ -125,16 +126,8 @@ public class AggregateMapmatching implements AggregationInterface {
 		double trackVerhoudingHemelsbreed = trackLengte / (gpsTrack.getHemelsbredeLengte() / 1000);
 		double trackTijd = gpsTrack.getTotaleTijd() / 1000 / 3600;
         if (trackTijd == 0) return;
-	//	StringBuilder query = new StringBuilder();
-		//query.append("INSERT INTO " + LoginDatabase.getTabelNaam("gps_match", dataset) + "  (routeid, linknummer, richting, snelheid, uur) VALUES ");
-        	 
-		int routeID = gpsTrack.getRouteID();			
-		int uur = gpsTrack.getBeginUur();
-		//ArrayList<LinkAttributen> linkAttributen = new ArrayList<LinkAttributen>(); 
-        for (int i = 0; i < gematchteRoute.getLinkList().length; i++) {
-			if (i > 0) {
-      //  		query.append(",");
-        	}	
+      	 
+        for (int i = 0; i < gematchteRoute.getLinkList().length; i++) {	
         	linkNummer = gematchteRoute.getLinkList()[i];
         	linkIndex = dijkstra.linknummersReverse.get(Math.abs(linkNummer));
 
@@ -145,16 +138,8 @@ public class AggregateMapmatching implements AggregationInterface {
         	addVerhoudingHemelsbreed(linkIndex, trackVerhoudingHemelsbreed);
         	
         	DLink dLink = dijkstra.links.get(Math.abs(linkNummer));
-        	double snelheid = addSnelheid(linkIndex, linkNummer, dLink, gpsTrack, trackLengte / trackTijd);
-        	
-        //	query.append(" (" + routeID + "," + 
-       // 	    Math.abs(gematchteRoute.getLinkList()[i]) + "," + 
-      //  		boolean2String(gematchteRoute.getLinkList()[i] > 0) + "," + 
-      //  	    snelheid + "," + 
-      //  		uur + ")");
+        	addSnelheid(linkIndex, linkNummer, dLink, gpsTrack, trackLengte / trackTijd);
         }
-       // LoginDatabase.execUpdate(query.toString());
-	 
 
 		RouteAnswer kortsteRoute = links[1];
         for (int i = 0; i < kortsteRoute.getLinkList().length; i++) {
@@ -233,7 +218,7 @@ public class AggregateMapmatching implements AggregationInterface {
 				waarde.add(Tools.makeNaN0(linkAttributen[i].verhoudingHemelsbreed / linkAttributen[i].aantal) + "");
 				waardes.add(waarde);			
 			} else {
-				System.out.println("linkattributen["+ i +"] is NULL");
+			//	System.out.println("linkattributen["+ i +"] is NULL");
 			}
 		} 
 		databaseSchrijver.writeRecords(tabel, waardes);
@@ -293,7 +278,7 @@ public class AggregateMapmatching implements AggregationInterface {
 		if (beginNodes.isEmpty() || endNodes.isEmpty()) return null;
 		kortsteRoute = dijkstra.maakRoute(beginNodes.get(minI), endNodes.get(minJ), null);
 		
-        if ((minRoute.getLengte() > 5 * kortsteRoute.getLengte()) || (minRoute.getLengte() < 500)) {
+        if ((minRoute.getLengte() > 5 * kortsteRoute.getLengte()) || (minRoute.getLengte() < 200)) {
         	return null;
         }
 	    return new RouteAnswer[]{minRoute,kortsteRoute};

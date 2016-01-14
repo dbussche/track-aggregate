@@ -51,6 +51,7 @@ public class SimpleAggregateTest {
 	    for (AggregationInterface aggregeerMethode: aggregationClasses) {
 	    	aggregeerMethode.exit();
 	    }
+	    System.out.println("helemaal Klaar ");
 	    
 	}
 
