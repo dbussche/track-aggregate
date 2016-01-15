@@ -28,11 +28,11 @@ public class AggregateMapmatching implements AggregationInterface {
 	private Dijkstra2 dijkstra;
 	LinkAttributes[] linkAttributen = null;
 	NodeAttributes[] knoopAttributen = null;
-	private DatabaseWriterInterface databaseSchrijver;
+	private DatabaseWriterInterface databaseWriter;
 
 	@Override
-	public void init(DatabaseWriterInterface databaseSchrijver, String bbox) {
-        this.databaseSchrijver = databaseSchrijver;
+	public void init(DatabaseWriterInterface databaseWriter, String bbox) {
+        this.databaseWriter = databaseWriter;
 		String getCapabilities = 
 	            "http://hez04.goudmap.info:8080/geoserver/gc/ows?service=WFS";
         try {
@@ -121,6 +121,7 @@ public class AggregateMapmatching implements AggregationInterface {
         	return;        	
         }
         RouteAnswer[] links = match(gpsTrack);
+        if (links == null) return;
 		RouteAnswer gematchteRoute = links[0];
 		double trackLengte = gpsTrack.getLengte() / 1000;
 		double trackVerhoudingHemelsbreed = trackLengte / (gpsTrack.getHemelsbredeLengte() / 1000);
@@ -198,13 +199,13 @@ public class AggregateMapmatching implements AggregationInterface {
 	*/
 	private void schrijfLinkattributen() {
 		TableWriter tabel = new TableWriter("linkattributen");
-		tabel.addKolom("linknummer", ColumnType.INTEGER);
-		tabel.addKolom("snelheid", ColumnType.FLOAT);
-		tabel.addKolom("snelheid_relatief", ColumnType.FLOAT);
-		tabel.addKolom("intensiteit", ColumnType.INTEGER);
-		tabel.addKolom("intensiteit_kortsteroute", ColumnType.INTEGER);
-		tabel.addKolom("verhouding_hemelsbreed", ColumnType.INTEGER);
-		databaseSchrijver.createTable(tabel);
+		tabel.addColumn("linknummer", ColumnType.INTEGER);
+		tabel.addColumn("snelheid", ColumnType.FLOAT);
+		tabel.addColumn("snelheid_relatief", ColumnType.FLOAT);
+		tabel.addColumn("intensiteit", ColumnType.INTEGER);
+		tabel.addColumn("intensiteit_kortsteroute", ColumnType.INTEGER);
+		tabel.addColumn("verhouding_hemelsbreed", ColumnType.FLOAT);
+		databaseWriter.createTable(tabel);
 		
 		ArrayList<ArrayList<String>> waardes = new ArrayList<ArrayList<String>>();
 		for (int i = 0; i < linkAttributen.length; i++) {
@@ -221,16 +222,16 @@ public class AggregateMapmatching implements AggregationInterface {
 			//	System.out.println("linkattributen["+ i +"] is NULL");
 			}
 		} 
-		databaseSchrijver.writeRecords(tabel, waardes);
+		databaseWriter.writeRecords(tabel, waardes);
 	}
 
 	private void schrijfFietsnet() {
 		TableWriter tabel = new TableWriter("fietsnet");
-		tabel.addKolom("linknummer", ColumnType.INTEGER);
-		tabel.addKolom("nodea", ColumnType.INTEGER);
-		tabel.addKolom("nodeb", ColumnType.INTEGER);
-		tabel.addKolom("geometry", ColumnType.GEOMETRY);
-		databaseSchrijver.createTable(tabel);
+		tabel.addColumn("linknummer", ColumnType.INTEGER);
+		tabel.addColumn("nodea", ColumnType.INTEGER);
+		tabel.addColumn("nodeb", ColumnType.INTEGER);
+		tabel.addColumn("geometry", ColumnType.GEOMETRY);
+		databaseWriter.createTable(tabel);
 		
 		ArrayList<ArrayList<String>> waardes = new ArrayList<ArrayList<String>>();
 		for (int i = 0; i < dijkstra.aantKnopen; i++) {
@@ -245,7 +246,7 @@ public class AggregateMapmatching implements AggregationInterface {
 				waardes.add(waarde);
 			}
 		}
-		databaseSchrijver.writeRecords(tabel, waardes);
+		databaseWriter.writeRecords(tabel, waardes);
 	}
 
 	private RouteAnswer[] match(GPSTrack gpsTrack) {
@@ -253,6 +254,7 @@ public class AggregateMapmatching implements AggregationInterface {
 		int aantal = gpsTrack.getAantal();
 		ArrayList<Integer> beginNodes = dijkstra.getNodes(gpsTrack.getNode(0).getX(), gpsTrack.getNode(0).getY(), 1000);
 		ArrayList<Integer> endNodes   = dijkstra.getNodes(gpsTrack.getNode(aantal-1).getX(), gpsTrack.getNode(aantal-1).getY(), 1000);
+		if (beginNodes.isEmpty() || endNodes.isEmpty()) return null;
 		
 		double afwijking;
 		double minAfwijking = 999999999;
@@ -365,7 +367,7 @@ private double addSnelheid(int linkIndex, int linkNummer, DLink dLink, GPSTrack 
 		double tijdKnooppunt = (gpsTrack.getTijdAt(puntPlus50 ) - gpsTrack.getTijdAt(puntMinus50 )) / 1000;
 		double tijdVoor =      (gpsTrack.getTijdAt(puntMinus50) - gpsTrack.getTijdAt(puntMinus100)) / 1000;
 		double tijdNa =        (gpsTrack.getTijdAt(puntPlus100) - gpsTrack.getTijdAt(puntPlus50  )) / 1000;
-		//double fiktieveTijd = 0.2 / linkSnelheid / 1000 / 3600;
+		
 	    if (knoopAttributen[knoopnummer] == null) {
 			knoopAttributen[knoopnummer] = new NodeAttributes(knoopPunt.x,knoopPunt.y, dijkstra.knopenIndexReverse.get(knoopnummer));
 		}

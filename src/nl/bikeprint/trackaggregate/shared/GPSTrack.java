@@ -1,6 +1,5 @@
 package nl.bikeprint.trackaggregate.shared;
 
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -179,65 +178,7 @@ public class GPSTrack {
 	public double getLengteTussen(DPoint punt1, DPoint punt2) {
 		return getLine().getLengteTussen(punt1, punt2);
 	}	
-
-	/*
-	public void naarDatabase(String dataset) {
-		
-		if (getAantal() < 2) return;
-		
-		StringBuilder query = new StringBuilder();
-		GPSPunt gpsPoint;
-		query.append("INSERT INTO " + LoginDatabase.getTabelNaam("gpstrack",dataset) + " (routeid, datestring, speed, st_transform) VALUES ");
-
-		StringBuilder wkt = new StringBuilder();
- 	    wkt.append("ST_GeomFromText('LINESTRING(");
- 	    try {	
-    		for (int i = 0; i < getAantal(); i++) {
-    			gpsPoint = getNode(i);	    			
-    			if (i > 0) {
-            		wkt.append(",");
-            		query.append(",");
-            	}	
-            	wkt.append(gpsPoint.getX() + " " + gpsPoint.getY());
-		        query.append("(" + getRouteID() + ",'" + gpsPoint.getDateString() + "'," + gpsPoint.getSnelheid() + ",");
-		        query.append("ST_SetSRID(ST_Point(" + gpsPoint.getX() + "," +  gpsPoint.getY() + "),900913) )");
-    	    }
-            wkt.append(")',900913)");
-
-            LoginDatabase.execUpdate(query.toString());
-            PreparedStatement ps;
-		    ps = LoginDatabase.getConnection().prepareStatement(
-		    		"INSERT INTO " + LoginDatabase.getTabelNaam("routes",dataset) + " (route_id, modality, uur, dag, snelheid, lengte, geometry) VALUES (?, ?, ?, ?, ?, ?, " + wkt.toString() + ");"
-		    	);
-            ps.setInt(1, routeID);
-            ps.setInt(2, getModality());
-            ps.setInt(3, getBeginUur());
-            ps.setInt(4, getWeekdag());
-            ps.setDouble(5, getSnelheid());
-            ps.setDouble(6, getLengte());
-            ps.executeUpdate();            	
-            
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}			
-	
-	}
-	 
-*/
-	
-	private int getWeekdag() {
-		if (weekDag == null) {
-			return -1;
-		} else {
-			return (int)weekDag;	
-		}	
-	}
-
-	private double getSnelheid() {
-        double uur = (double)(getNode(getAantal() - 1).getTime() - getNode(0).getTime()) / 1000 / 3600;
-        return getLengte() / uur;
-	}
-
+ 
 	public int getBeginUur() {
 		if (beginUur == null) {
 			return -1;
@@ -444,6 +385,13 @@ public class GPSTrack {
 			sum += Math.min(snelheden[i], maximum);
 		}
 		return sum / snelheden.length;
+	}
+
+	public double getDistance2Vertices(int i) {
+        // gives distance in meters, presuming coordinates are in EPSG 900913
+		GPSPoint lastPoint = gpsArray.get(i - 1);
+		GPSPoint thisPoint = gpsArray.get(i);
+		return GoudmapLine.distance_2_Points(thisPoint.getX(), thisPoint.getY(), lastPoint.getX(), lastPoint.getY()) / Constants.GOOGLE_FACTOR * 1000;
 	}
    
 }

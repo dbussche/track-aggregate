@@ -18,9 +18,13 @@ public class BikePrintDatabaseWriter implements DatabaseWriterInterface {
 	}
 
 	public boolean createTable(TableWriter table) {
-		String query = table.getCreateQuery(schema);
-		LoginDatabase.execUpdate(query);
-		LoginDatabase.execUpdate("TRUNCATE " + schema + "." + table.getNaam());		 
+	//	String query = table.getCreateQuery(schema);
+	//	LoginDatabase.execUpdate(query);
+	//	LoginDatabase.execUpdate("TRUNCATE " + schema + "." + table.getNaam());		 
+
+		LoginDatabase.execUpdate("DROP TABLE IF EXISTS " + schema + "." + table.getNaam());
+		LoginDatabase.execUpdate(table.getCreateQuery(schema));
+				 
 		return true;
 	}
 
