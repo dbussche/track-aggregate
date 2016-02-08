@@ -47,7 +47,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class BasicWFSReader {
-	private boolean DEBUG = true;
+	private boolean DEBUG = false;
 	 
 	public Document capabilities = null;
 	private URL serviceURL = null;

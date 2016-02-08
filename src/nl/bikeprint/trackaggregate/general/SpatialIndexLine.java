@@ -15,12 +15,12 @@ import com.infomatiq.jsi.rtree.RTree;
 import nl.bikeprint.trackaggregate.aggregegationMethods.mapmatching.DPoint;
 import nl.bikeprint.trackaggregate.general.GoudmapLine;
 
-public class GoudmapSpatialIndex {
+public class SpatialIndexLine {
      
     private SpatialIndex rTree = new RTree();
     private HashMap<Integer, GoudmapLine> goudmapLines = new HashMap<Integer, GoudmapLine>();
     
-    public GoudmapSpatialIndex() {
+    public SpatialIndexLine() {
     	rTree.init(null);
     }
     

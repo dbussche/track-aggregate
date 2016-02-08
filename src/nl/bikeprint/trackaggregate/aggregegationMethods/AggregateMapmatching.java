@@ -33,15 +33,15 @@ public class AggregateMapmatching implements AggregationInterface {
 	@Override
 	public void init(DatabaseWriterInterface databaseWriter, String bbox) {
         this.databaseWriter = databaseWriter;
-		String getCapabilities = 
-	            "http://hez04.goudmap.info:8080/geoserver/gc/ows?service=WFS";
+        getCycleNetworkFromWFS(bbox);
+	}
+
+	private void getCycleNetworkFromWFS(String bbox) {
+        String getCapabilities = "http://hez04.goudmap.info:8080/geoserver/gc/ows?service=WFS";
         try {
 			BasicWFSReader reader = new BasicWFSReader(new URL(getCapabilities));
 			reader.getCapabilities();
-			Document response;
-            
-			response = reader.getFeatureBasic("gc:fietsnetwerk", 0, bbox);
-			System.out.println(response);
+			Document response = reader.getFeatureBasic("gc:fietsnetwerk", 0, bbox);
 			dijkstra = new Dijkstra2();
 
 	    	NodeList nl = response.getChildNodes();
@@ -103,7 +103,7 @@ public class AggregateMapmatching implements AggregationInterface {
 		           	}
 				}
 			}
-			System.err.println("Aantal " + dijkstra.aantKnopen);
+
 			linkAttributen = new LinkAttributes[dijkstra.links.size()];
 			knoopAttributen = new NodeAttributes[dijkstra.links.size() * 2];	
 		} catch (MalformedURLException e) {

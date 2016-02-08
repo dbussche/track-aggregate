@@ -10,7 +10,7 @@ import java.util.Map;
 
 import nl.bikeprint.trackaggregate.general.ArrayTools;
 import nl.bikeprint.trackaggregate.general.GoudmapLine;
-import nl.bikeprint.trackaggregate.general.GoudmapSpatialIndex;
+import nl.bikeprint.trackaggregate.general.SpatialIndexLine;
 import nl.bikeprint.trackaggregate.shared.GPSTrack;
 
 import com.infomatiq.jsi.Point;
@@ -31,7 +31,7 @@ public class Dijkstra2 {
     public HashMap<Integer, Integer> knopenIndexReverse;
 	double WACHTEN_SECONDEN = 30;
     HashMap<Integer,Double> afstandWeerstand = new HashMap<Integer,Double>();
-    GoudmapSpatialIndex spatialIndex = new GoudmapSpatialIndex();
+    SpatialIndexLine spatialIndex = new SpatialIndexLine();
     
     public Dijkstra2() {
     	knopenIndex = new HashMap<Integer, Integer>();

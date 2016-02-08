@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import nl.bikeprint.trackaggregate.shared.DatabaseWriterInterface;
 import nl.bikeprint.trackaggregate.shared.TableWriter;
 
-
 public class BikePrintDatabaseWriter implements DatabaseWriterInterface {
 
 	private String schema;
@@ -18,13 +17,8 @@ public class BikePrintDatabaseWriter implements DatabaseWriterInterface {
 	}
 
 	public boolean createTable(TableWriter table) {
-	//	String query = table.getCreateQuery(schema);
-	//	LoginDatabase.execUpdate(query);
-	//	LoginDatabase.execUpdate("TRUNCATE " + schema + "." + table.getNaam());		 
-
 		LoginDatabase.execUpdate("DROP TABLE IF EXISTS " + schema + "." + table.getNaam());
-		LoginDatabase.execUpdate(table.getCreateQuery(schema));
-				 
+		LoginDatabase.execUpdate(table.getCreateQuery(schema));				 
 		return true;
 	}
 

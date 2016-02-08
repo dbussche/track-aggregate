@@ -48,11 +48,19 @@ public class Tools {
 	}
 	
 	public static String makeNaN0(Double d) {
-		if (d.isNaN() || d.isInfinite()) {
+		if (d == null || d.isNaN() || d.isInfinite()) {
 			return "0";
 		} else {
 			return d.toString();
 		}
 	}
+	
+	public static String makeNaN0(Integer i) {
+		if (i == null) {
+			return "0";
+		} else {
+			return i.toString();
+		}
+	}	
 	 
 }

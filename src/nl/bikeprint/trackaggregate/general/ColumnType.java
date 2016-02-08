@@ -13,7 +13,7 @@ public class ColumnType {
 	public static final ColumnType INTEGER = new ColumnType(1);
 	public static final ColumnType FLOAT = new ColumnType(2);
 	public static final ColumnType DOUBLE = new ColumnType(3);
-	public static final ColumnType String = new ColumnType(4);
+	public static final ColumnType STRING = new ColumnType(4);
 	public static final ColumnType GEOMETRY = new ColumnType(5);
 	public static final ColumnType TIMESTAMP = new ColumnType(6);
 	
